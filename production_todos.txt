@@ -1,0 +1,6 @@
+-add session store
+-deal with possibility of unknown id in passport.deserialize
+-secure CORS settings
+-secure session cookie settings
+-tighten up schemaType for user emails
+-xfer env vars

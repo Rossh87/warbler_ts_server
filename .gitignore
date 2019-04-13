@@ -106,4 +106,7 @@ typings/
 #vscode files
 .vscode
 
+#notes-to-self
+.txt
+
 # End of https://www.gitignore.io/api/node,linux
