@@ -8,7 +8,6 @@ var userSchema = new mongoose_1.default.Schema({
     displayName: {
         type: String,
         required: true,
-        unique: true,
         lowercase: true
     },
     name: {

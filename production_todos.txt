@@ -1,6 +1,9 @@
--add session store
 -deal with possibility of unknown id in passport.deserialize
 -secure CORS settings
 -secure session cookie settings
 -tighten up schemaType for user emails
 -xfer env vars
+-change redirects upon successful authorization(?)
+-abstract auth success redirect function(?) and passport verify function
+-extract custom type definitions to declaration file?
+-obscure DB URLs

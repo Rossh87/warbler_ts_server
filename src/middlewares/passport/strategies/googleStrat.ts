@@ -5,14 +5,15 @@ import {
 } from 'passport-google-oauth20';
 
 // Get mongoose model and user type
-import User, {IUser} from '../models/user';
+import User, {IUser, TUserDoc} from '../../../models/user';
+import { Model } from 'mongoose';
 
 // Google OAuth keys saved as env vars
 const GAUTH_CLIENT_ID = <string>process.env.GAUTH_CLIENT_ID;
 const GAUTH_CLIENT_SECRET = <string>process.env.GAUTH_CLIENT_SECRET;
 
 // Establish type for 'verify' callback function, then define function
-const googleVerify: GoogleVerify<PassportProfile, IUser> =
+const googleVerify: GoogleVerify<PassportProfile> =
 async (token, secret, profile, done) => {
     try {
         const foundUser = await User.findOne({
@@ -36,7 +37,11 @@ async (token, secret, profile, done) => {
 
             const newUser = await User.create(userObj);
             console.log('user created', newUser);
-            done(null, userObj)
+
+            // It is necessary to pass mongoose document, not just
+            // userObj, to done, so that the document _id (rather than provider id from profile)
+            // can be used to serialize the user.
+            done(null, newUser)
         }
 
         else {

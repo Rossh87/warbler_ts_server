@@ -39,57 +39,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-// Get basic express dependencies
-var express_1 = __importDefault(require("express"));
-var cors_1 = __importDefault(require("cors"));
-var body_parser_1 = __importDefault(require("body-parser"));
 // Auth dependencies
 var passport_1 = __importDefault(require("passport"));
-var express_session_1 = __importDefault(require("express-session"));
-var user_1 = __importDefault(require("./models/user"));
+var user_1 = __importDefault(require("../../models/user"));
 var googleStrat_1 = __importDefault(require("./strategies/googleStrat"));
-var app = express_1.default();
-var SESSION_SECRET = process.env.SESSION_SECRET;
-// If SESSION_SECRET is undefined, app is not secure.
-// Here we define a verification function to break the app
-// if secret is not provided.
-var verifyPresenceOfSecret = function () {
-    if (SESSION_SECRET) {
-        return SESSION_SECRET;
-    }
-    throw new Error('Session secret must not be undefined');
-};
-// Begin middlewares
-app.use(cors_1.default());
-app.use(body_parser_1.default.json());
-// Auth middlewares
-passport_1.default.use(googleStrat_1.default);
-passport_1.default.serializeUser(function (userParam, done) {
-    console.log('from serialize', userParam);
-    done(null, userParam._id);
-});
-passport_1.default.deserializeUser(function (_id, done) { return __awaiter(_this, void 0, void 0, function () {
-    var foundUser, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, user_1.default.findById(_id)];
-            case 1:
-                foundUser = _a.sent();
-                done(null, foundUser);
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                done(err_1);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
+var facebookStrat_1 = __importDefault(require("./strategies/facebookStrat"));
+var initPassport = function (app) {
+    passport_1.default.use(googleStrat_1.default);
+    passport_1.default.use(facebookStrat_1.default);
+    passport_1.default.serializeUser(function (userParam, done) {
+        console.log('from serialize', userParam);
+        done(null, userParam._id);
     });
-}); });
-app.use(express_session_1.default({
-    secret: verifyPresenceOfSecret(),
-}));
-app.use(passport_1.default.initialize());
-app.use(passport_1.default.session());
-exports.default = app;
+    passport_1.default.deserializeUser(function (_id, done) { return __awaiter(_this, void 0, void 0, function () {
+        var foundUser, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, user_1.default.findById(_id)];
+                case 1:
+                    foundUser = _a.sent();
+                    done(null, foundUser);
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    done(err_1);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    }); });
+    app.use(passport_1.default.initialize());
+    app.use(passport_1.default.session());
+    return app;
+};
+exports.default = initPassport;

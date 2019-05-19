@@ -22,7 +22,7 @@ declare module 'passport-google-oauth20' {
         in as a parameter, as well as the user object that will be 
         passed into callback.
     **/
-    export interface GoogleVerify<TProfile = {}, TUser = {}> {
+    export interface GoogleVerify<TProfile = {}, TUser = any> {
         (
             token: string,
             tokenSecret: string,

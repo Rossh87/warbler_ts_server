@@ -3,12 +3,20 @@ import {Profile as PassportProfile} from 'passport';
 
 // This interface represents only the salient data in
 // a user document, without any of the properties provided
-// by mongoose class constructor.
-export interface IUser extends PassportProfile {    
-    providerIDs: {
-        google?: string,
-        facebook?: string
-    }
+// by mongoose wrapper.
+export interface IUser {    
+    displayName: string,
+
+    name: {
+        familyName: string,
+        givenName: string
+    },
+
+    provider: string,
+
+    photos: {value: string} [],
+
+    emails: {value: string} []
 }
 
 // Intersection type to represent a retrieved user document,
@@ -19,7 +27,6 @@ const userSchema = new mongoose.Schema({
     displayName: {
         type: String,
         required: true,
-        unique: true,
         lowercase: true
     },
 
@@ -34,9 +41,8 @@ const userSchema = new mongoose.Schema({
         },
     },
 
-    providerIDs: {
-        google: String,
-        facebook: String
+    provider: {
+        type: String
     },
 
     photos: [{value: String}],

@@ -7,9 +7,10 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "nodemon -r dotenv/config build/index.js",
+    "start": "rm -rf build && tsc && nodemon -r dotenv/config build/index.js",
     "build": "tsc",
-    "debug": "node -r dotenv/config --inspect build/index.js"
+    "debug": "node -r dotenv/config --inspect build/index.js",
+    "test": "NODE_ENV=TEST jest"
   },
   "dependencies": {
     "@types/cors": "^2.8.4",
@@ -17,6 +18,7 @@
     "@types/express-session": "^1.15.12",
     "@types/node": "^11.12.2",
     "body-parser": "^1.18.3",
+    "connect-mongodb-session": "^2.1.1",
     "cors": "^2.8.5",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
@@ -24,11 +26,21 @@
     "mongoose": "^5.4.20",
     "morgan": "^1.9.1",
     "passport": "^0.4.0",
+    "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/connect-mongodb-session": "^0.0.0",
+    "@types/jest": "^24.0.11",
     "@types/mongoose": "^5.3.24",
     "@types/passport": "^1.0.0",
+    "@types/passport-facebook": "^2.1.9",
+    "@types/supertest": "^2.0.7",
+    "babel-jest": "^24.7.1",
+    "jest": "^24.7.1",
     "nodemon": "^1.18.10",
     "supertest": "^4.0.2",
     "typescript": "^3.4.1"

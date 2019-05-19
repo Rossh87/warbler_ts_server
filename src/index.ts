@@ -1,28 +1,23 @@
-// Get configured Express instance
-import app from './middlewares';
+import express from 'express';
+import initMiddlewares from './middlewares';
 
-// Get connection to MongoDB running on MLab cloud server
+// connect to database
 import './database';
 
-import passport from 'passport';
+// Get routes
+import authRoutes from './routes/auth';
+import apiRoutes from './routes/api';
 
-// Env vars
 const PORT = process.env.PORT;
 
-app.get(
-    '/auth/google',
-    passport.authenticate('google', {scope: ['profile', 'email']})
-);
+// Get an express instance with middleware
+const app = initMiddlewares(express());
 
-app.get(
-    '/auth/google/callback',
-    passport.authenticate('google', {failureRedirect: '/'}),
-    (req, res) => {
-        const {_id} = req.user;
-        res.redirect(`http://localhost:3000/users/${_id}`);
-    }
-)
+app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
 
 app.listen(PORT || 3001, () => {
     console.log(`listening on ${PORT}`);
 });
+
+

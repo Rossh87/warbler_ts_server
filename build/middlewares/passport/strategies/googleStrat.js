@@ -41,7 +41,7 @@ var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var passport_google_oauth20_1 = require("passport-google-oauth20");
 // Get mongoose model and user type
-var user_1 = __importDefault(require("../models/user"));
+var user_1 = __importDefault(require("../../../models/user"));
 // Google OAuth keys saved as env vars
 var GAUTH_CLIENT_ID = process.env.GAUTH_CLIENT_ID;
 var GAUTH_CLIENT_SECRET = process.env.GAUTH_CLIENT_SECRET;
@@ -69,7 +69,10 @@ var googleVerify = function (token, secret, profile, done) { return __awaiter(_t
             case 2:
                 newUser = _a.sent();
                 console.log('user created', newUser);
-                done(null, userObj);
+                // It is necessary to pass mongoose document, not just
+                // userObj, to done, so that the document _id (rather than provider id from profile)
+                // can be used to serialize the user.
+                done(null, newUser);
                 return [3 /*break*/, 4];
             case 3:
                 console.log('user found', foundUser);
