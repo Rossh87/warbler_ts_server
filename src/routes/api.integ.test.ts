@@ -14,12 +14,17 @@ import '../database';
 // Get type for user prop on req
 import { IUser } from '../models/user';
 
+// Get Document type to diff the user type
+import {Document} from 'mongoose';
+import {TDiffTypeProps} from '../declarations/utilityTypes';
+
+
 const app = express();
 
 // Add a middleware to populate the user property on the 
 // request object.  In the live app, this is handled by authorization logic
 // (i.e. passport.serialize/deserialize), but that doesn't need to be tested here.
-const mockUser: IUser = {
+const mockUser: TDiffTypeProps<IUser, Document> = {
     displayName: 'some name',
     name: {
         familyName: 'hunter',
@@ -32,6 +37,8 @@ const mockUser: IUser = {
         value: 'email@mail.com'
     }],
     provider: 'facebook',
+
+    messages: ['123', '456']
 };
 
 app.use((req, res, next) => {
@@ -47,5 +54,10 @@ describe('api route handlers', () => {
         const response = await request(app).get('/api/user');
 
         expect(response.text).toEqual(JSON.stringify(mockUser))
+    });
+
+    it('responds to GET /messages with JSON of all messages', async () => {
+        
     })
-})
+});
+

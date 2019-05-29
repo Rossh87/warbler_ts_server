@@ -6,11 +6,10 @@ const res = {
     status: jest.fn(() => res),
     send: jest.fn()
 };
+
 const next = jest.fn();
 
 describe('authorization middleware fn', () => {
-
-    
 
     it('calls next without params if user property is present on request', () => {
         const req = {

@@ -40,8 +40,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
 var passport_facebook_1 = require("passport-facebook");
-// Get mongoose model and user type
+// Get mongoose model
 var user_1 = __importDefault(require("../../../models/user"));
+// Get helper function to modify profile object before saving to DB
+var stratUtils_1 = require("./stratUtils");
 // Facebook OAuth keys saved as env vars
 var FBOOK_CLIENT_ID = process.env.FBOOK_CLIENT_ID;
 var FBOOK_CLIENT_SECRET = process.env.FBOOK_CLIENT_SECRET;
@@ -53,24 +55,18 @@ var facebookVerify = function (token, secret, profile, done) { return __awaiter(
             case 0:
                 _a.trys.push([0, 5, , 6]);
                 return [4 /*yield*/, user_1.default.findOne({
-                        providerIDs: {
-                            facebook: profile.id
-                        }
-                    }).lean()];
+                        provider: 'facebook',
+                        id: profile.id
+                    })];
             case 1:
                 foundUser = _a.sent();
                 if (!!foundUser) return [3 /*break*/, 3];
-                userObj = Object.assign(profile, {
-                    providerIDs: {
-                        facebook: profile.id
-                    }
-                });
+                userObj = stratUtils_1.replacePropName(profile, 'id', 'providerId');
                 return [4 /*yield*/, user_1.default.create(userObj)];
             case 2:
                 newUser = _a.sent();
-                console.log('user created', newUser);
                 // It is necessary to pass mongoose document, not just
-                // userObj, to done, so that the document _id (rather than provider id from profile)
+                // userObj, to done, so that the document _id 
                 // can be used to serialize the user.
                 done(null, newUser);
                 return [3 /*break*/, 4];

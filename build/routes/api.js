@@ -39,53 +39,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-var passport_google_oauth20_1 = require("passport-google-oauth20");
-// Get mongoose model
-var user_1 = __importDefault(require("../../../models/user"));
-// Get helper function to modify profile object before saving to DB
-var stratUtils_1 = require("./stratUtils");
-// Google OAuth keys saved as env vars
-var GAUTH_CLIENT_ID = process.env.GAUTH_CLIENT_ID;
-var GAUTH_CLIENT_SECRET = process.env.GAUTH_CLIENT_SECRET;
-// Establish type for 'verify' callback function, then define function
-var googleVerify = function (token, secret, profile, done) { return __awaiter(_this, void 0, void 0, function () {
-    var foundUser, userObj, newUser, err_1;
+var express_1 = __importDefault(require("express"));
+var router = express_1.default.Router();
+// Middleware to ensure request is authenticated before sending data
+var auth_1 = require("../handlers/auth");
+// Get message model
+var message_1 = __importDefault(require("../models/message"));
+;
+exports.respondWithUserData = function (req, res) {
+    res.json(req.user);
+};
+exports.respondWithMessages = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+    var allMessages, e_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 5, , 6]);
-                return [4 /*yield*/, user_1.default.findOne({
-                        providerIDs: {
-                            google: profile.id
-                        }
-                    })];
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, message_1.default.find()];
             case 1:
-                foundUser = _a.sent();
-                if (!!foundUser) return [3 /*break*/, 3];
-                userObj = stratUtils_1.replacePropName(profile, 'id', 'providerId');
-                return [4 /*yield*/, user_1.default.create(userObj)];
+                allMessages = _a.sent();
+                res.json(allMessages);
+                return [3 /*break*/, 3];
             case 2:
-                newUser = _a.sent();
-                // It is necessary to pass mongoose document, not just
-                // userObj, to done, so that the document _id (rather than provider id from profile)
-                // can be used to serialize the user.
-                done(null, newUser);
-                return [3 /*break*/, 4];
-            case 3:
-                console.log('user found', foundUser);
-                done(null, foundUser);
-                _a.label = 4;
-            case 4: return [3 /*break*/, 6];
-            case 5:
-                err_1 = _a.sent();
-                done(err_1);
-                return [3 /*break*/, 6];
-            case 6: return [2 /*return*/];
+                e_1 = _a.sent();
+                next(e_1);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); };
-exports.default = new passport_google_oauth20_1.Strategy({
-    clientID: GAUTH_CLIENT_ID,
-    clientSecret: GAUTH_CLIENT_SECRET,
-    callbackURL: 'http://localhost:8001/auth/google/callback'
-}, googleVerify);
+// Type cast our handler to soothe the TS compiler
+router.get('/user', auth_1.ensureAuthenticated, exports.respondWithUserData);
+router.get('/messages', exports.respondWithMessages);
+exports.default = router;

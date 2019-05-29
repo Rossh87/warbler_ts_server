@@ -4,7 +4,7 @@ import {Profile as PassportProfile} from 'passport';
 // This interface represents only the salient data in
 // a user document, without any of the properties provided
 // by mongoose wrapper.
-export interface IUser {    
+export interface IUser extends Document {    
     displayName: string,
 
     name: {
@@ -16,12 +16,10 @@ export interface IUser {
 
     photos: {value: string} [],
 
-    emails: {value: string} []
-}
+    emails: {value: string} [],
 
-// Intersection type to represent a retrieved user document,
-// including extra goodies from mongoose
-export type TUserDoc = IUser & Document;
+    messages: string []
+}
 
 const userSchema = new mongoose.Schema({
     displayName: {
@@ -52,7 +50,14 @@ const userSchema = new mongoose.Schema({
             type: String,
             required: true
         }
+    }],
+
+    messages: [{
+        type: Schema.Types.ObjectId,
+        required: true
     }]
+}, {
+    timestamps: true
 });
 
 export default mongoose.model('User', userSchema);

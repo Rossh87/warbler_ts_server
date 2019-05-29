@@ -1,6 +1,6 @@
 // Auth dependencies
 import passport from 'passport';
-import User, {TUserDoc} from '../../models/user';
+import User, {IUser} from '../../models/user';
 import googleStrategy from './strategies/googleStrat';
 import facebookStrategy from './strategies/facebookStrat';
 
@@ -13,15 +13,15 @@ const initPassport: IInitFunction = (app) => {
 
     passport.use(facebookStrategy);
 
-    passport.serializeUser<TUserDoc, string>((userParam, done) => {
+    passport.serializeUser<IUser, string>((userParam, done) => {
         console.log('from serialize', userParam);
         done(null, userParam._id);
     });
 
-    passport.deserializeUser<TUserDoc, string>(async (_id, done) => {
+    passport.deserializeUser<IUser, string>(async (_id, done) => {
         try {
             const foundUser = await User.findById(_id);
-            done(null, <TUserDoc>foundUser);
+            done(null, <IUser>foundUser);
         }
 
         catch(err) {

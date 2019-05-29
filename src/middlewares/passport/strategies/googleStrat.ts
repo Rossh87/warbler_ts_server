@@ -1,12 +1,14 @@
-import passport, {Profile as PassportProfile} from 'passport';
+import {Profile as PassportProfile} from 'passport';
 import {
     Strategy as GoogleStrat,
     GoogleVerify
 } from 'passport-google-oauth20';
 
-// Get mongoose model and user type
-import User, {IUser, TUserDoc} from '../../../models/user';
-import { Model } from 'mongoose';
+// Get mongoose model
+import User from '../../../models/user';
+
+// Get helper function to modify profile object before saving to DB
+import {replacePropName} from './stratUtils';
 
 // Google OAuth keys saved as env vars
 const GAUTH_CLIENT_ID = <string>process.env.GAUTH_CLIENT_ID;
@@ -20,23 +22,16 @@ async (token, secret, profile, done) => {
             providerIDs: {
                 google: profile.id
             }
-        }).lean();
+        });
 
         // If no User document exists for the profile in question,
         // create one and pass it to 'done' callback.
         if(!foundUser) {
-            // Add providerIDs prop to profile object in a way that
-            // doesn't upset TS compiler.  Note that result is an inferred
-            // type identical to IUser
-            
-            const userObj = Object.assign(profile, {
-                providerIDs: {
-                    google: profile.id
-                }
-            });
+            // Change profile.id to more explicit value to avoid confusion
+            // with database document property '_id'  
+            const userObj = replacePropName(profile, 'id', 'providerId');
 
             const newUser = await User.create(userObj);
-            console.log('user created', newUser);
 
             // It is necessary to pass mongoose document, not just
             // userObj, to done, so that the document _id (rather than provider id from profile)
