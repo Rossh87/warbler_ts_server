@@ -1,4 +1,4 @@
-import {ensureAuthenticated} from './auth';
+import {ensureAuthenticated, ensureAuthorized} from './auth';
 
 afterEach(() => jest.clearAllMocks());
 
@@ -9,7 +9,7 @@ const res = {
 
 const next = jest.fn();
 
-describe('authorization middleware fn', () => {
+describe('Authentication middleware fn', () => {
 
     it('calls next without params if user property is present on request', () => {
         const req = {
@@ -28,6 +28,41 @@ describe('authorization middleware fn', () => {
         ensureAuthenticated(req, res, next);
 
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Authorization required'));
+        expect(res.send).toHaveBeenCalledWith(expect.stringContaining('permission denied'));
     })
-})
+});
+
+describe('Authorization middleware fn', () => {
+
+    it('calls next without params if req.params._id does match req.user._id', () => {
+        const req = {
+            user: {
+                _id: '123'
+            },
+
+            params: {
+                _id: '123'
+            }
+        };
+
+        ensureAuthorized(req, res, next);
+        expect(next.mock.calls[0][0]).toBe(undefined);
+    });
+
+    it('responds with a 401 if user and request ids don\'t match', () => {
+        const req = {
+            user: {
+                _id: '123'
+            },
+
+            params: {
+                _id: '456'
+            }
+        };
+
+        ensureAuthorized(req, res, next);
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.send).toHaveBeenCalledWith(expect.stringContaining('permission denied'));
+    })
+});

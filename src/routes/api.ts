@@ -1,41 +1,19 @@
-import express, {RequestHandler, Request, Response, NextFunction} from 'express';
+import express, {RequestHandler} from 'express';
+
+// Get route handlers for data/logic
+import {respondWithUserData} from '../handlers/user';
+import {respondWithMessages, createMessage} from '../handlers/messages';
+
+// Authorization gate middleware
+import {ensureAuthenticated, ensureAuthorized} from '../handlers/auth';
+
+// Create router instance
 const router = express.Router();
-
-// Middleware to ensure request is authenticated before sending data
-import {ensureAuthenticated} from '../handlers/auth';
-
-// Type of user property added to req object from session storage
-import User, { IUser } from '../models/user';
-
-// Get message model
-import Message from '../models/message';
-
-// Tighten up type definitions to add user data prop
-export interface IAuthenticatedRequest<T> extends Request {
-    user: T
-};
-
-export interface AuthenticatedReqHandler<UserShape> {
-    (req:IAuthenticatedRequest<UserShape>, res: Response, next: NextFunction):any
-}
-
-export const respondWithUserData: AuthenticatedReqHandler<IUser> = (req, res) => {
-    res.json(req.user);
-}
-
-export const respondWithMessages: AuthenticatedReqHandler<IUser> = async (req, res, next) => {
-    try {
-        const allMessages = await Message.find();
-        res.json(allMessages);
-    }
-
-    catch(e) {
-        next(e);
-    }
-}
 
 // Type cast our handler to soothe the TS compiler
 router.get('/user', ensureAuthenticated, respondWithUserData as RequestHandler);
-router.get('/messages', respondWithMessages as RequestHandler);
+router.get('/messages', ensureAuthenticated, respondWithMessages as RequestHandler);
+router.post('/messages/create', ensureAuthenticated, createMessage as RequestHandler);
+
 
 export default router;

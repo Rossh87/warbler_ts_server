@@ -5,6 +5,14 @@ exports.ensureAuthenticated = function (req, res, next) {
         next();
     }
     else {
-        res.status(401).send('Authorization required');
+        res.status(401).send('Request failed, permission denied.');
+    }
+};
+exports.ensureAuthorized = function (req, res, next) {
+    if (req.params._id === req.user._id) {
+        next();
+    }
+    else {
+        res.status(401).send('Request failed, permission denied.');
     }
 };
