@@ -18,4 +18,9 @@ router.get('/facebook/callback', passport_1.default.authenticate('facebook', { f
     var _id = req.user._id;
     res.redirect("http://localhost:3000/users/" + _id);
 });
+// Signout
+router.get('/signout', function (req, res) {
+    req.logout();
+    res.redirect('http://localhost:3000');
+});
 exports.default = router;

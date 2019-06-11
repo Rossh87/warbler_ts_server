@@ -6,6 +6,6 @@ export interface IAuthenticatedRequest<T> extends Request {
     user: T
 };
 
-export interface AuthenticatedReqHandler<UserShape> {
-    (req:IAuthenticatedRequest<UserShape>, res: Response, next: NextFunction):any
+export interface AuthenticatedReqHandler<T> {
+    (req:IAuthenticatedRequest<T>, res: Response, next: NextFunction):any
 }

@@ -66,7 +66,9 @@ var mockUser = {
             value: 'email@mail.com'
         }],
     provider: 'facebook',
-    messages: ['123', '456']
+    messages: ['123', '456'],
+    createdAt: Date.now().toString(),
+    updatedAt: Date.now().toString()
 };
 app.use(function (req, res, next) {
     req.user = mockUser;

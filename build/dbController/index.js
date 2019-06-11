@@ -34,56 +34,70 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-// Bring in controller that interfaces with data layer
-var dbController = __importStar(require("../dbController"));
-// Send all existing messages as JSON.  Note that author data is partially 
-// populated in this response.
-exports.respondWithMessages = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-    var messages, e_1;
+// Get Mongoose models
+var user_1 = __importDefault(require("../models/user"));
+var message_1 = __importDefault(require("../models/message"));
+// Get all msgs from db and return them
+exports.getMessages = function () { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, dbController.getPopulatedMessages()];
-            case 1:
-                messages = _a.sent();
-                res.json(messages);
-                return [3 /*break*/, 3];
-            case 2:
-                e_1 = _a.sent();
-                next(e_1);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+            case 0: return [4 /*yield*/, message_1.default.find()];
+            case 1: return [2 /*return*/, _a.sent()];
         }
     });
 }); };
-// Create a new message and respond with the created message.
-exports.createMessage = function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-    var text, newMessage, e_2;
+// Get all messages with their 'author' property populated with a user object,
+// and pruned for convenience/efficiency
+exports.getPopulatedMessages = function () { return __awaiter(_this, void 0, void 0, function () {
+    var messages, populatedMsgs;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, exports.getMessages()];
+            case 1:
+                messages = _a.sent();
+                return [4 /*yield*/, Promise.all(messages.map(function (msg) {
+                        return msg.populate('author', 'createdAt updatedAt displayName photos').execPopulate();
+                    }))];
+            case 2:
+                populatedMsgs = _a.sent();
+                return [2 /*return*/, populatedMsgs];
+        }
+    });
+}); };
+// Creates a new msg and returns it.  Note that pre-save hook in Message model
+// updates the User document that corresponds to the message's author.  If an invalid
+// id is passed to createMessage, the pre-save hook will throw, preventing the creation of
+// a new message document.
+exports.createMessage = function (text, author) { return __awaiter(_this, void 0, void 0, function () {
+    var newMessage;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                text = req.body.text;
-                return [4 /*yield*/, dbController.createMessage(text, req.user.id)];
+                if (!text || !author) {
+                    throw new Error('Text and Author information required to create new message');
+                }
+                return [4 /*yield*/, message_1.default.create({ text: text, author: author })];
             case 1:
                 newMessage = _a.sent();
-                res.json(newMessage);
-                return [3 /*break*/, 3];
-            case 2:
-                e_2 = _a.sent();
-                next(e_2);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [2 /*return*/, newMessage];
+        }
+    });
+}); };
+// Not currently used, may be useful later.  Lookup and return any user document
+// By _id.
+exports.getUser = function (_id) { return __awaiter(_this, void 0, void 0, function () {
+    var user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, user_1.default.findById(_id)];
+            case 1:
+                user = _a.sent();
+                return [2 /*return*/, user];
         }
     });
 }); };

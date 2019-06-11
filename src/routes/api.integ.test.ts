@@ -12,7 +12,7 @@ import request from 'supertest';
 import '../database';
 
 // Get type for user prop on req
-import { IUser } from '../models/user';
+import { IUser } from '../models/types';
 
 // Get Document type to diff the user type
 import {Document} from 'mongoose';
@@ -38,7 +38,11 @@ const mockUser: TDiffTypeProps<IUser, Document> = {
     }],
     provider: 'facebook',
 
-    messages: ['123', '456']
+    messages: ['123', '456'],
+
+    createdAt: Date.now().toString(),
+
+    updatedAt: Date.now().toString()
 };
 
 app.use((req, res, next) => {

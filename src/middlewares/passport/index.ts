@@ -1,12 +1,13 @@
 // Auth dependencies
 import passport from 'passport';
-import User, {IUser} from '../../models/user';
+import User from '../../models/user';
 import googleStrategy from './strategies/googleStrat';
 import facebookStrategy from './strategies/facebookStrat';
 
 
 // type fluff
 import {IInitFunction} from '../';
+import {IUser} from '../../models/types';
 
 const initPassport: IInitFunction = (app) => {
     passport.use(googleStrategy);

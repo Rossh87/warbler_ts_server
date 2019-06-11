@@ -30,6 +30,12 @@ router.get(
         const {_id} = req.user;
         res.redirect(`http://localhost:3000/users/${_id}`);
     }
-)
+);
+
+// Signout
+router.get('/signout', (req, res) => {
+    req.logout();
+    res.redirect('http://localhost:3000');
+});
 
 export default router;

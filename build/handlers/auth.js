@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureAuthenticated = function (req, res, next) {
-    if (req.user) {
+    var origin = req.get('origin');
+    console.log(origin);
+    if (isLocalOrigin(origin) || req.user) {
         next();
     }
     else {
@@ -15,4 +17,9 @@ exports.ensureAuthorized = function (req, res, next) {
     else {
         res.status(401).send('Request failed, permission denied.');
     }
+};
+// Validation function to permit local requests to proceed w/out authorization
+var isLocalOrigin = function (path) {
+    var exp = /^http\:\/\/localhost\:.*/;
+    return exp.test(path);
 };
