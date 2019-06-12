@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureAuthenticated = function (req, res, next) {
-    var origin = req.get('origin');
-    console.log(origin);
-    if (isLocalOrigin(origin) || req.user) {
+    if (req.user) {
         next();
     }
     else {
