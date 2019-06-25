@@ -6,7 +6,7 @@ import {IMessage} from './types';
 // Get User model for save hook
 import User from './user';
 
-const messageSchema = new mongoose.Schema({
+export const messageSchema = new mongoose.Schema({
     text: {
         type: String,
         required: true

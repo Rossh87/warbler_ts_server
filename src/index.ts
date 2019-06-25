@@ -13,8 +13,11 @@ const PORT = process.env.PORT;
 // Get an express instance with middleware
 const app = initMiddlewares(express());
 
+// Mount routers
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
+
+// Universal error handler
 
 app.listen(PORT || 3001, () => {
     console.log(`listening on ${PORT}`);

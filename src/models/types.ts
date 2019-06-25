@@ -9,7 +9,7 @@ export interface IMessage extends Document {
 };
 
 // This is the type that the 'author' field of Message documents will have
-// when they are sent out to the interwebz.
+// in a response.
 export type TTrimmedAuthor = Pick<IUser, 'photos' | 'displayName' | 'createdAt' | 'updatedAt'>
 
 // Type for User documents retrieved by Mongoose (with Mongoose wrapper)
