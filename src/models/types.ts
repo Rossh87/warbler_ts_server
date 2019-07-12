@@ -1,12 +1,15 @@
 import {Document} from 'mongoose';
+import {TDiffTypeProps} from '../declarations/utilityTypes';
 
 // Type for Message documents retrieved by Mongoose (with Mongoose wrapper)
 export interface IMessage extends Document {
     text: string,
     createdAt: string,
     updatedAt: string,
-    author: string | IUser | TTrimmedAuthor
+    author: string
 };
+
+export type TLeanMessage = TDiffTypeProps<IMessage, Document>;
 
 // This is the type that the 'author' field of Message documents will have
 // in a response.
@@ -33,4 +36,6 @@ export interface IUser extends Document {
 
     updatedAt: string
 };
+
+export type TLeanUser = TDiffTypeProps<IUser, Document>;
 

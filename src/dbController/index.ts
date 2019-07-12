@@ -4,7 +4,6 @@ import Message from '../models/message';
 
 // Get types
 import {IUser, IMessage} from '../models/types';
-import { tsNumberKeyword } from '@babel/types';
 
 // Get all msgs from db and return them
 export const getMessages = async (): Promise<IMessage []> => {
@@ -23,7 +22,7 @@ export const getPopulatedMessages = async (): Promise<IMessage []> => {
     return populatedMsgs;
 };
 
-// Creates a new msg and returns it.  Note that pre-save hook in Message model
+// Creates a new msg, saves it, and returns the created document.  Note that pre-save hook in Message model
 // updates the User document that corresponds to the message's author.  If an invalid
 // id is passed to createMessage, the pre-save hook will throw, preventing the creation of
 // a new message document.

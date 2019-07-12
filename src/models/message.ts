@@ -6,6 +6,21 @@ import {IMessage} from './types';
 // Get User model for save hook
 import User from './user';
 
+class HookError extends Error {
+    public msg: string;
+    public msgID: string;
+    public foundAuthorID: string;
+
+    constructor(msg: string, id: string, author: string) {
+        super()
+        this.msg = msg;
+
+        this.msgID = id;
+
+        this.foundAuthorID = author;
+    }
+}
+
 export const messageSchema = new mongoose.Schema({
     text: {
         type: String,
@@ -33,7 +48,7 @@ messageSchema.pre<IMessage>('save', async function() {
         const authorDoc = await User.findById(author);
 
         // typeguard
-        if(authorDoc === null) {throw new Error('Invalid User')};
+        if(authorDoc === null) {throw new HookError('author document not found', _id, author)};
 
         // Add id of new message to author's list of messages
         authorDoc.messages.push(_id);
@@ -42,7 +57,7 @@ messageSchema.pre<IMessage>('save', async function() {
     }
    
     catch(e) {
-        // TODO: Better err handling
+        console.log(e);
     }
 });
 
