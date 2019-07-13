@@ -39,8 +39,8 @@ interface IConfig {
 export class testDBController {
     private _messages: Array<IMessage>;
     private _users: Array<IUser>;
-    private _Message: Model<IMessage>;
-    private _User: Model<IUser>;
+    public _Message: Model<IMessage>;
+    public _User: Model<IUser>;
     public currentUser: IUser | null;
 
     constructor() {
@@ -116,9 +116,6 @@ export class testDBController {
     }
 
     private genFakeMessage(): IMessage {
-        if(!this._users.length) {
-            throw new Error('genMockUsers must be called before generating fake messages!');
-        };
 
         const author =
             this.selectUser()._id
@@ -132,6 +129,10 @@ export class testDBController {
     }
 
     public genMockMessages(messageCount: number) {
+        if(!this._users.length) {
+            throw new Error('genMockUsers must be called before generating fake messages!');
+        };
+
         let remaining = messageCount;
 
         while(remaining > 0) {
@@ -158,13 +159,40 @@ export class testDBController {
         this._messages = [];
         await this._User.collection.drop();
         await this._Message.collection.drop();
+        return this;
     }
 
     public closeConnection() {
         return mongoose.connection.close();
     }
 
+    // Test whether a given JSON string is a representation of saved data
+    public isSimilarArray(saved: Array<IUser | IMessage>, json: string): boolean {
+        const nativeArray = JSON.parse(json);
+
+        nativeArray.includesObject = function(savedObj: IUser | IMessage) {
+            let includes: boolean = false;
+            this.forEach((obj: IUser | IMessage) => {
+                if(obj._id === savedObj._id) {
+                    includes = true;
+                }
+            });
+            return includes;
+        };
+
+        let isSimilar = true;
+
+        saved.forEach(obj => {
+            if(!nativeArray.includesObject(obj)) {
+                isSimilar = false;
+            }
+        });
+
+        return isSimilar && saved.length === nativeArray.length;
+    }
+
     private handleError(err: Error) {
         console.error(err);
     }
 }
+

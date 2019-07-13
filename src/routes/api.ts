@@ -7,7 +7,6 @@ import {respondWithMessages, createMessage} from '../handlers/messages';
 // Authorization gate middleware
 import {ensureAuthenticated, ensureAuthorized} from '../handlers/auth';
 
-// Create router instance
 const router = express.Router();
 
 // Type cast our handler to soothe the TS compiler

@@ -1,15 +1,10 @@
-// Integration testing seems like the most economical way to 
-// test routes, data schemas, and db queries all at the same time.
-// Some unit tests for routes involving complex logic will likely be appropriate
-// as well.
-import express from 'express';
+import express, {Express} from 'express';
 import apiRoutes from './api';
 
-// Get integration testing util
+// Get integration testing utils
 import request from 'supertest';
-
-// Bring in db.  Will automatically connect to test DB when tests run
-import '../database';
+import {testDBController as tdb} from '../testUtils';
+import bodyParser from 'body-parser';
 
 // Get type for user prop on req
 import { IUser } from '../models/types';
@@ -18,50 +13,71 @@ import { IUser } from '../models/types';
 import {Document} from 'mongoose';
 import {TDiffTypeProps} from '../declarations/utilityTypes';
 
+const testDB = new tdb();
 
-const app = express();
+let app: Express;
+let currUser: IUser;
 
-// Add a middleware to populate the user property on the 
-// request object.  In the live app, this is handled by authorization logic
-// (i.e. passport.serialize/deserialize), but that doesn't need to be tested here.
-const mockUser: TDiffTypeProps<IUser, Document> = {
-    displayName: 'some name',
-    name: {
-        familyName: 'hunter',
-        givenName: 'ross'
-    },
-    photos: [{
-        value: 'http://url/to/photo.com'
-    }],
-    emails: [{
-        value: 'email@mail.com'
-    }],
-    provider: 'facebook',
+beforeEach(async() => {
+    app = express();
 
-    messages: ['123', '456'],
+    // Reset test database
+    await testDB.clear();
 
-    createdAt: Date.now().toString(),
+    // Add fresh data to db
+    await testDB.genMockUsers(2).genMockMessages(2).saveData()
 
-    updatedAt: Date.now().toString()
-};
+    currUser = testDB.selectUser();
 
-app.use((req, res, next) => {
-    req.user = mockUser;
+    // Add a middleware to populate the 'user' property on the
+    // 'request' object, simulating an authenticated request.
+    app.use(bodyParser.json());
 
-    next();
-});
+    app.use((req, res, next) => {
+        req.user = currUser;
 
-app.use('/api', apiRoutes);
-
-describe('api route handlers', () => {
-    it('responds with json of user object', async () => {
-        const response = await request(app).get('/api/user');
-
-        expect(response.text).toEqual(JSON.stringify(mockUser))
+        next();
     });
 
-    it('responds to GET /messages with JSON of all messages', async () => {
-        
+    app.use(apiRoutes);
+});
+
+afterAll(async () => {
+    return await testDB.closeConnection();
+})
+
+describe('the api routes', () => {
+    it('responds to GET /user with json of user object', async () => {
+        const response = await request(app).get('/user');
+
+        expect(response.text).toEqual(JSON.stringify(currUser))
+    });
+
+    it('responds to GET "/messages" with populated messages from db', async() => {
+        const response = await request(app).get('/messages');
+
+        // Query db directly here to make sure response and expected are in same order--
+        // there's currently no simple way to compare arrays with same contents in 
+        // different order
+        const expected = await testDB._Message.find().populate('author', 'createdAt updatedAt displayName photos').exec();
+
+        expect(response.text).toEqual(JSON.stringify(expected))
+    });
+
+    it('responds to POST "/messages/create" by creating new db entry for user and replies w/ new entry ', async () => {
+        const response = await request(app)
+            .post('/messages/create')
+            .send({text: 'test text'});
+
+        const resText = JSON.parse(response.text);
+
+        const dbMessages = await testDB._Message.find();
+
+        expect(resText.text).toEqual('test text');
+        expect(resText.author).toEqual(currUser._id.toString());
+
+        // ensure there is an extra Message doc in db
+        expect(dbMessages.length).toEqual(testDB.messages.length + 1);
     })
 });
 
