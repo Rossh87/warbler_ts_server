@@ -2,14 +2,18 @@
 import {AuthenticatedReqHandler} from './types';
 import {IUser} from '../models/types';
 
-// Bring in controller that interfaces with data layer
-import * as dbController from '../dbController';
+
+// Get Mongoose models
+import Message from '../models/message';
 
 // Send all existing messages as JSON.  Note that author data is partially 
 // populated in this response.
 export const respondWithMessages: AuthenticatedReqHandler<IUser> = async (req, res, next) => {
     try {
-        const messages = await dbController.getPopulatedMessages();
+        const messages = await Message.find()
+            .populate('author', 'createdAt updatedAt displayName photos')
+            .exec();
+
         res.json(messages);
     }
 
@@ -24,8 +28,8 @@ export const createMessage: AuthenticatedReqHandler<IUser> = async (req, res, ne
     try {
         const {text} = req.body;
 
-        const newMessage = await dbController.createMessage(text, req.user.id);
-
+        const newMessage = await Message.create({text, author: req.user._id});
+        
         res.json(newMessage);
     }
 

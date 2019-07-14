@@ -9,7 +9,7 @@ import User from './user';
 class HookError extends Error {
     public msg: string;
     public msgID: string;
-    public foundAuthorID: string;
+    public authorID: string;
 
     constructor(msg: string, id: string, author: string) {
         super()
@@ -17,7 +17,7 @@ class HookError extends Error {
 
         this.msgID = id;
 
-        this.foundAuthorID = author;
+        this.authorID = author;
     }
 }
 

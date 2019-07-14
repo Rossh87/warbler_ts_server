@@ -5,22 +5,11 @@ import mongoose, {Model, ConnectionOptions, Connection} from 'mongoose';
 // Get schemas/types for mock data
 import {userSchema} from './models/user';
 import {messageSchema} from './models/message';
-import {IUser, IMessage, TLeanMessage, TLeanUser} from './models/types';
-import { worker } from 'cluster';
+import {IUser, IMessage} from './models/types';
 
 
-// create a custom connection to test DB.  We will connect our document schemas
-// through this connection and add the resulting models as static methods to the 
-// controller class.
 const MLAB_USERNAME = process.env.MLAB_USERNAME;
 const MLAB_PW = process.env.MLAB_PW;
-// const testDBConnection = mongoose.createConnection(
-//     `mongodb://${MLAB_USERNAME}:${MLAB_PW}@ds229415.mlab.com:29415/warbler_test_db`,
-//     {
-//         useNewUrlParser: true,
-//         useCreateIndex: true
-//     },
-// )
 
 mongoose.connect(`mongodb://${MLAB_USERNAME}:${MLAB_PW}@ds229415.mlab.com:29415/warbler_test_db`,
 {
@@ -41,7 +30,6 @@ export class testDBController {
     private _users: Array<IUser>;
     public _Message: Model<IMessage>;
     public _User: Model<IUser>;
-    public currentUser: IUser | null;
 
     constructor() {
 
@@ -52,8 +40,6 @@ export class testDBController {
         this._Message = mongoose.model('Message', messageSchema);
 
         this._User = mongoose.model('User', userSchema);
-
-        this.currentUser = null;
     }
 
     get messages() {
@@ -157,8 +143,8 @@ export class testDBController {
     public async clear() {
         this._users = [];
         this._messages = [];
-        await this._User.collection.drop();
-        await this._Message.collection.drop();
+        await this._User.deleteMany({});
+        await this._Message.deleteMany({});
         return this;
     }
 
