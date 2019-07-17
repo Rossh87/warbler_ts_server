@@ -7,6 +7,7 @@ import {
     createMessage, 
     deleteMessage
 } from '../handlers/messages';
+import {withCatch} from '../handlers/error';
 
 // Authorization gate middleware
 import {ensureAuthenticated} from '../handlers/auth';
@@ -14,12 +15,12 @@ import {ensureAuthenticated} from '../handlers/auth';
 const router = express.Router();
 
 // User routes
-router.get('/user', ensureAuthenticated, respondWithUserData as RequestHandler);
+router.get('/user', ensureAuthenticated, withCatch(respondWithUserData));
 
 // Message routes
-router.get('/messages', ensureAuthenticated, respondWithMessages as RequestHandler);
-router.post('/messages/create', ensureAuthenticated, createMessage as RequestHandler);
-router.delete('/messages/:id', ensureAuthenticated, deleteMessage as RequestHandler)
+router.get('/messages', ensureAuthenticated, withCatch(respondWithMessages));
+router.post('/messages/create', ensureAuthenticated, withCatch(createMessage));
+router.delete('/messages/:id', ensureAuthenticated, withCatch(deleteMessage));
 
 
 export default router;

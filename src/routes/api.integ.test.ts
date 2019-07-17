@@ -39,7 +39,7 @@ app.use(apiRoutes);
 
 beforeEach(async() => {
     // Reset test database
-    await testDB.clear();
+    return await testDB.clear();
 });
 
 afterAll(async () => {

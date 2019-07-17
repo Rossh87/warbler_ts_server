@@ -1,5 +1,4 @@
 import { RequestHandler } from "express-serve-static-core";
-import { hostname } from "os";
 
 export const ensureAuthenticated: RequestHandler = (req, res, next) => {
 
