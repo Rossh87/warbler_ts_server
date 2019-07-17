@@ -7,14 +7,15 @@ import {testDBController as tdb} from '../testUtils';
 import bodyParser from 'body-parser';
 
 // Get type for user prop on req
-import { IUser } from '../models/types';
+import { IUser, IMessage } from '../models/types';
+import User from '../models/user';
 
 const testDB = new tdb();
 
 let app: Express = express();
 let currUser: IUser;
 
-async function setup(config: {users?: number, messages?: number} = {}) {
+async function setup(config: {users?: number, messages?: number} = {}): Promise<[Array<IUser>, Array<IMessage>]> {
     await testDB
         .genMockUsers(config.users || 2)
         .genMockMessages(config.messages || 5)
@@ -84,6 +85,30 @@ describe('the api routes', () => {
 
         // ensure there is an extra Message doc in db
         expect(dbMessages.length).toEqual(messages.length + 1);
-    })
+    });
+
+    it('responds to DELETE "/messages/:id" by deleting the message in URI and triggers remove middleware', async () => {
+        const [users, messages] = await setup();
+        const messageToDelete = messages[0];
+
+        currUser = await testDB._User.findById(messages[0].author) as IUser;
+
+        const response = await request(app)
+            .delete(`/messages/${messageToDelete._id}`);
+        
+        // ensure deleted msg is gone from db;
+        const updatedMessages = await testDB._Message.find();
+        expect(updatedMessages.length).toEqual(messages.length - 1);
+
+        // ensure deleted msg is gone from author's associated messages
+        const authorOfDeleted = await testDB._User.findById(messageToDelete.author);
+        if(!authorOfDeleted) {
+            throw('no author found')
+        }
+
+        expect(
+            authorOfDeleted.messages.some((msgID) => msgID === messageToDelete._id)
+        ).toEqual(false);
+    });
 });
 

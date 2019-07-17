@@ -34,6 +34,30 @@ export const createMessage: AuthenticatedReqHandler<IUser> = async (req, res, ne
     }
 
     catch(e) {
-        next(e)
+        next(e);
+    }
+}
+
+// delete a message.
+export const deleteMessage: AuthenticatedReqHandler<IUser> = async (req, res, next) => {
+    try {
+        const messageToDelete = await Message.findById(req.params.id);
+
+        if(!messageToDelete) {
+            throw new Error('Message not found')
+        }
+
+        else if(!messageToDelete.isAuthorizedRequest(req)){
+            throw new Error('Unauthorized request');
+        }
+
+        else {
+            await messageToDelete.remove();
+            res.status(204).send();
+        }
+    }
+
+    catch(e) {
+        next(e);
     }
 }

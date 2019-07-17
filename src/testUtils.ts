@@ -42,11 +42,11 @@ export class testDBController {
         this._User = mongoose.model('User', userSchema);
     }
 
-    get messages() {
+    get messages(): Array<IMessage> {
         return this._messages;
     }
 
-    get users() {
+    get users(): Array<IUser> {
         return this._users;
     }
 
@@ -56,7 +56,7 @@ export class testDBController {
         return providers[Math.round(Math.random())]
     };
 
-    private genFakeUser() {
+    private genFakeUser(): IUser {
         const fakeUserNode = {    
             displayName: faker.internet.userName(),
     

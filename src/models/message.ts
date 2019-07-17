@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 
 // Get needed types
 import {IMessage} from './types';
+import {Request} from 'express';
 
 // Get User model for save hook
 import User from './user';
@@ -21,7 +22,7 @@ class HookError extends Error {
     }
 }
 
-export const messageSchema = new mongoose.Schema({
+export const messageSchema = new mongoose.Schema<IMessage>({
     text: {
         type: String,
         required: true
@@ -48,7 +49,7 @@ messageSchema.pre<IMessage>('save', async function() {
         const authorDoc = await User.findById(author);
 
         // typeguard
-        if(authorDoc === null) {throw new HookError('author document not found', _id, author)};
+        if(!authorDoc) {throw new HookError('author document not found', _id, author)};
 
         // Add id of new message to author's list of messages
         authorDoc.messages.push(_id);
@@ -61,5 +62,33 @@ messageSchema.pre<IMessage>('save', async function() {
     }
 });
 
+// Before a message is deleted, remove the message from the 
+// author's list of associated messages
+messageSchema.pre<IMessage>('remove', async function() {
+    const {author, _id} = this;
+
+    const authorDoc = await User.findById(author);
+
+    // In case author is not found for some reason...
+    if(!authorDoc) {
+        throw new Error('Hook Error: Message author not found')
+    };
+
+    authorDoc.messages = 
+        authorDoc.messages.filter((msgID) => msgID !== _id);
+
+    await authorDoc.save();
+});
+
+// Message document should have a method to ensure that a given Express
+// request is authorized to modify it.  Note the call to 'toString' to enable
+// comparison--these properties are actually objects in the Mongoose document.
+messageSchema.methods.isAuthorizedRequest = function(req: Request) {
+    return this.author.toString() === req.user._id.toString();
+}
+    
+
 const Message: Model<IMessage> = mongoose.model<IMessage>('Message', messageSchema);
+
+
 export default Message;
