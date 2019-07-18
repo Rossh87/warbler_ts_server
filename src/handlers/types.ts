@@ -1,21 +1,23 @@
-import express, {RequestHandler, Request, Response, NextFunction} from 'express';
-
+import express, {
+    RequestHandler,
+    Request,
+    Response,
+    NextFunction
+} from "express";
 
 // Tighten up type definitions to add user data prop
 export interface IAuthenticatedRequest<T> extends Request {
-    user: T
-};
-
-export interface AuthenticatedReqHandler<T> extends RequestHandler {
-    (req:IAuthenticatedRequest<T>, res: Response, next: NextFunction):any
+    user: T;
 }
 
-export class HandlerError extends Error {
+export interface AuthenticatedReqHandler<T> extends RequestHandler {
+    (req: IAuthenticatedRequest<T>, res: Response, next: NextFunction): any;
+}
 
-    constructor(public rawError: Error, public prettyMessage: string, public status?: number) {
+export class CustomError extends Error {
+    constructor(public message: string, public status?: number) {
         super();
-        this.rawError = rawError;
-        this.prettyMessage = prettyMessage;
+        this.message = message;
         this.status = status;
     }
 }

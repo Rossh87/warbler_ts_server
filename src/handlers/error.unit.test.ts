@@ -1,42 +1,57 @@
-import {handleErrors} from './error'
-import {HandlerError} from './types';
-import request from 'supertest';
-import express from 'express';
+import * as errUtils from "./error";
+import { CustomError } from "./types";
 
-const app = express();
+const next = jest.fn();
 
+const handlerArgs = [jest.fn(), jest.fn(), next];
 
-let err: HandlerError;
-// Throw an error on any request
-app.get('*', (req, res) => {
-    throw err;
+afterEach(() => {
+    jest.clearAllMocks();
 });
 
-app.use(handleErrors);
+describe("Function throwError", () => {
+    it("creates a new error with correct shape and throws it", () => {
+        expect(() => errUtils.throwErr("test msg", 500)).toThrow(CustomError);
+    });
+});
 
-describe('Error handler', () => {
-    it('sets res status to match err.status', (done) => {
-        err = new HandlerError(new Error('raw error'), 'message', 403);
-        const response = request(app)
-            .get('/')
-            .expect(403, done);
+describe("Function withCatch", () => {
+    it('causes all errors thrown within param function to be passed to "next"', async () => {
+        const expected = new Error("test err");
+
+        async function throwError() {
+            throw expected;
+        }
+
+        await errUtils.withCatch(throwError)(1 as any, 2 as any, next);
+
+        expect(next).toHaveBeenLastCalledWith(expected);
+    });
+});
+
+describe("Function validateOrThrow returns a function that", () => {
+    it("throws a CustomError if test function returns false", () => {
+        function someAsync() {
+            return Promise.resolve(null);
+        }
+
+        const errText = "async result invalid";
+
+        const validator = errUtils.validateOrThrow((r) => r, errText, 500);
+
+        return validator(someAsync()).catch((err) => {
+            expect(err instanceof CustomError).toBe(true);
+        });
     });
 
-    it('sets status to 500 if no status is specified', (done) => {
-        err = new HandlerError(new Error('raw error'), 'message');
-        request(app)
-            .get('/')
-            .expect(500, done);
+    it("returns passed-in value if test function returns true", async () => {
+        const validator = errUtils.validateOrThrow(
+            (r) => r === "expected",
+            "test err",
+            500
+        );
+
+        const result = await validator(Promise.resolve("expected"));
+        expect(result).toEqual("expected");
     });
-
-    it('responds with custom message from error', (done) => {
-        err = new HandlerError(new Error('raw error'), 'message', 403);
-        request(app)
-            .get('/')
-            .end((err, res) => {
-                expect(res.text).toEqual('message');
-                done();
-            })
-    })
-})
-
+});

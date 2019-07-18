@@ -3,7 +3,7 @@ import mongoose, { Schema, Model } from "mongoose";
 // Get needed types
 import { IMessage } from "./types";
 import { Request } from "express";
-import { HandlerError } from "../handlers/types";
+import { CustomError } from "../handlers/types";
 
 // Get User model for save hook
 import User from "./user";
