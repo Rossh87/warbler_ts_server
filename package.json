@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "start": "rm -rf build && tsc && nodemon -r dotenv/config build/index.js",
+    "start": "rm -rf build && tsc && NODE_ENV='development' node -r dotenv/config build/index.js",
     "build": "tsc",
     "debug": "node -r dotenv/config --inspect build/index.js",
     "test": "NODE_ENV=TEST jest"
