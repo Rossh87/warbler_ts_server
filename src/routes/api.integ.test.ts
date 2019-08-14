@@ -62,6 +62,16 @@ describe("the api routes", () => {
         expect(response.text).toEqual(JSON.stringify(currUser));
     });
 
+    it("responds to GET /sessionStatus with json of session status", async () => {
+        await setup();
+
+        const response = await request(app).get("/sessionStatus");
+
+        const result = JSON.parse(response.text);
+
+        expect(result).toEqual({ sessionIsActive: true });
+    });
+
     it('responds to GET "/messages" with populated messages from db', async () => {
         await setup();
 

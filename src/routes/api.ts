@@ -1,26 +1,29 @@
-import express, {RequestHandler} from 'express';
+import express, { RequestHandler } from "express";
 
 // Get route handlers for data/logic
-import {respondWithUserData} from '../handlers/user';
+import {
+    respondWithUserData,
+    respondWithSessionStatus
+} from "../handlers/user";
 import {
     respondWithMessages,
-    createMessage, 
+    createMessage,
     deleteMessage
-} from '../handlers/messages';
-import {withCatch} from '../handlers/error';
+} from "../handlers/messages";
+import { withCatch } from "../handlers/error";
 
 // Authorization gate middleware
-import {ensureAuthenticated} from '../handlers/auth';
+import { ensureAuthenticated } from "../handlers/auth";
 
 const router = express.Router();
 
 // User routes
-router.get('/user', ensureAuthenticated, withCatch(respondWithUserData));
+router.get("/user", ensureAuthenticated, withCatch(respondWithUserData));
+router.get("/sessionStatus", ensureAuthenticated, respondWithSessionStatus);
 
 // Message routes
-router.get('/messages', ensureAuthenticated, withCatch(respondWithMessages));
-router.post('/messages/create', ensureAuthenticated, withCatch(createMessage));
-router.delete('/messages/:id', ensureAuthenticated, withCatch(deleteMessage));
-
+router.get("/messages", ensureAuthenticated, withCatch(respondWithMessages));
+router.post("/messages/create", ensureAuthenticated, withCatch(createMessage));
+router.delete("/messages/:id", ensureAuthenticated, withCatch(deleteMessage));
 
 export default router;
