@@ -88,11 +88,11 @@ describe("the api routes", () => {
         expect(response.text).toEqual(JSON.stringify(expected));
     });
 
-    it('responds to POST "/messages/create" by creating new db entry for user and replies w/ new entry ', async () => {
+    it('responds to POST "/messages/" by creating new db entry for user and replies w/ new entry ', async () => {
         const [users, messages] = await setup();
 
         const response = await request(app)
-            .post("/messages/create")
+            .post("/messages")
             .send({ text: "test text" });
 
         const resText = JSON.parse(response.text);

@@ -23,7 +23,7 @@ router.get("/sessionStatus", ensureAuthenticated, respondWithSessionStatus);
 
 // Message routes
 router.get("/messages", ensureAuthenticated, withCatch(respondWithMessages));
-router.post("/messages/create", ensureAuthenticated, withCatch(createMessage));
+router.post("/messages", ensureAuthenticated, withCatch(createMessage));
 router.delete("/messages/:id", ensureAuthenticated, withCatch(deleteMessage));
 
 export default router;

@@ -34,6 +34,10 @@ export const createMessage: RequestHandler = async (req, res, next) => {
         Message.create({ text, author: req.user._id })
     );
 
+    // newMessage
+    //     .populate("author", "createdAt updatedAt displayName photos")
+    //     .exec();
+
     res.json(newMessage);
 };
 
