@@ -6,8 +6,8 @@ export interface ITestFn {
     (res: any): boolean;
 }
 
-export interface IValidateOrThrow {
-    (res: Promise<any>): never | typeof res;
+export interface IValidateOrThrow<T> {
+    (res: Promise<T>): Promise<T> | never;
 }
 
 // Wrap async route handlers with HOC to add a catch block that passes any error
@@ -26,27 +26,19 @@ export const throwErr = (message: string, status?: number): never => {
 // Check if result of a successful async call meets our needs or
 // if it should throw.  Mostly used to check if result of executing Mongoose
 // Query is null.
-export const validateOrThrow = (
+export const validateOrThrow = <T>(
     testFN: ITestFn,
     message: string,
     status?: number
-): IValidateOrThrow => {
-    return function(promise) {
-        return promise.then(
-            // resolution callback
-            (res) => {
-                if (!testFN(res)) {
-                    throwErr(`${message} (validation failed)`, status);
-                }
-                return res;
-            },
-            // rejection callback.  This will generally only trigger if
-            // a database operation fails, so a 500 status code will nearly
-            // always be appropriate.
-            (reason) => {
-                throwErr(`${message} (rejection: ${reason})`, 500);
-            }
-        );
+): IValidateOrThrow<T> => {
+    return async function(promise) {
+        const resolvedPromise = await promise;
+
+        if (!testFN(resolvedPromise)) {
+            throwErr(`${message} (validation failed)`, status);
+        }
+
+        return resolvedPromise;
     };
 };
 

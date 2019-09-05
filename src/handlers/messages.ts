@@ -1,5 +1,6 @@
-// Type for handler
+// Types for handlers
 import { RequestHandler } from "express";
+import { Document } from "mongoose";
 
 // Util to make custom errors for any db operation that fails
 import { validateOrThrow, throwErr } from "./error";
@@ -27,18 +28,25 @@ export const respondWithMessages: RequestHandler = async (req, res, next) => {
 
 // Create a new message and respond with the created message.
 export const createMessage: RequestHandler = async (req, res, next) => {
-    const validator = validateOrThrow((r) => r, "Creation failed", 500);
+    const validator = validateOrThrow<Document>(
+        (r) => r,
+        "Creation failed",
+        500
+    );
     const { text } = req.body;
 
     const newMessage = await validator(
         Message.create({ text, author: req.user._id })
     );
 
-    // newMessage
-    //     .populate("author", "createdAt updatedAt displayName photos")
-    //     .exec();
+    const populatedNewMessage = await newMessage
+        .populate({
+            path: "author",
+            select: "createdAt updatedAt displayName photos"
+        })
+        .execPopulate();
 
-    res.json(newMessage);
+    res.json(populatedNewMessage);
 };
 
 // delete a message.
