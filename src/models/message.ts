@@ -3,10 +3,10 @@ import mongoose, { Schema, Model } from "mongoose";
 // Get needed types
 import { IMessage } from "./types";
 import { Request } from "express";
-import { validateOrThrow } from "../handlers/error";
 
 // Get User model for save hook
 import User from "./user";
+import { CustomError } from "../handlers/types";
 
 export const messageSchema = new mongoose.Schema<IMessage>(
     {
@@ -32,15 +32,14 @@ export const messageSchema = new mongoose.Schema<IMessage>(
 messageSchema.pre<IMessage>("save", async function() {
     // In Mongoose document middleware, keyword 'this' refers to the document
     // being operated on.
-    const validator = validateOrThrow(
-        (r) => r,
-        "Message pre-save failed: author not found",
-        500
-    );
 
     const { author, _id } = this;
 
-    const authorDoc = await validator(User.findById(author).exec());
+    const authorDoc = await User.findById(author).exec();
+
+    if (!authorDoc) {
+        throw new CustomError("Message pre-save failed: author not found", 500);
+    }
 
     // Add id of new message to author's list of messages
     authorDoc.messages.push(_id);
@@ -51,16 +50,16 @@ messageSchema.pre<IMessage>("save", async function() {
 // Before a message is deleted, remove the message from the
 // author's list of associated messages
 messageSchema.pre<IMessage>("remove", async function() {
-    const validator = validateOrThrow(
-        (r) => r,
-        "Message pre-remove failed: author not found",
-        500
-    );
-
     const { author, _id } = this;
 
-    const authorDoc = await validator(User.findById(author).exec());
+    const authorDoc = await User.findById(author).exec();
 
+    if (!authorDoc) {
+        throw new CustomError(
+            "Message pre-remove failed: author not found",
+            500
+        );
+    }
     authorDoc.messages = authorDoc.messages.filter(
         (msgID: string) => msgID !== _id
     );

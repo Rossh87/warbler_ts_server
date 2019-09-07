@@ -28,30 +28,3 @@ describe("Function withCatch", () => {
         expect(next).toHaveBeenLastCalledWith(expected);
     });
 });
-
-describe("Function validateOrThrow returns a function that", () => {
-    it("throws a CustomError if test function returns false", () => {
-        function someAsync() {
-            return Promise.resolve(null);
-        }
-
-        const errText = "async result invalid";
-
-        const validator = errUtils.validateOrThrow((r) => r, errText, 500);
-
-        return validator(someAsync()).catch((err) => {
-            expect(err instanceof CustomError).toBe(true);
-        });
-    });
-
-    it("returns passed-in value if test function returns true", async () => {
-        const validator = errUtils.validateOrThrow(
-            (r) => r === "expected",
-            "test err",
-            500
-        );
-
-        const result = await validator(Promise.resolve("expected"));
-        expect(result).toEqual("expected");
-    });
-});
