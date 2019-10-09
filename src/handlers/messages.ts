@@ -22,7 +22,7 @@ export const respondWithMessages: RequestHandler = async (req, res, next) => {
 export const createMessage: RequestHandler = async (req, res, next) => {
     const { text } = req.body;
 
-    const newMessage = Message.create({ text, author: req.user._id });
+    const newMessage = await Message.create({ text, author: req.user._id });
 
     /*client store depends on newly-created document's 'author' field being populated.
     Mongoose's Document#populate is undocumented in TypeScript (it seems)--so we'll
@@ -32,6 +32,8 @@ export const createMessage: RequestHandler = async (req, res, next) => {
         path: "author",
         select: "createdAt updatedAt displayName photos"
     });
+
+    console.log(populatedNewMessage);
 
     res.json(populatedNewMessage);
 };
