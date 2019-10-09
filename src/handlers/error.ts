@@ -1,18 +1,13 @@
 // Get needed types
-import { RequestHandler, ErrorRequestHandler } from "express";
+import { RequestHandler, ErrorRequestHandler, Request } from "express";
 import { CustomError } from "./types";
-
-export interface ITestFn {
-    (res: any): boolean;
-}
-
-export interface IValidateOrThrow<T> {
-    (res: Promise<T | null>): Promise<T | null> | never;
-}
+import { TAuthenticatedReqHandler, IAuthenticatedRequest } from "./types";
 
 // Wrap async route handlers with HOC to add a catch block that passes any error
 // that occurs in routes to Express
-export const withCatch = (fn: RequestHandler): RequestHandler => {
+export const withCatch = (
+    fn: TAuthenticatedReqHandler
+): TAuthenticatedReqHandler => {
     return function(req, res, next) {
         return fn(req, res, next).catch((err: any) => next(err));
     };

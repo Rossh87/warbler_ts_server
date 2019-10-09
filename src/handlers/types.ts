@@ -5,14 +5,20 @@ import express, {
     NextFunction
 } from "express";
 
-// Tighten up type definitions to add user data prop
-export interface IAuthenticatedRequest<T> extends Request {
-    user: T;
+import { IUser } from "../models/types";
+
+// Add 'user' property that will exist on request object of all authenticated requests
+export interface IAuthenticatedRequest extends Request {
+    user: IUser;
 }
 
-export interface AuthenticatedReqHandler<T> extends RequestHandler {
-    (req: IAuthenticatedRequest<T>, res: Response, next: NextFunction): any;
-}
+export type TAuthenticatedRequestHandler<T> = (
+    req: IAuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+) => any;
+
+export type TAuthenticatedReqHandler = TAuthenticatedRequestHandler<IUser>;
 
 export class CustomError extends Error {
     constructor(public message: string, public status?: number) {

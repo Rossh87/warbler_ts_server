@@ -1,5 +1,6 @@
 // Types for handlers
 import { RequestHandler } from "express";
+import { TAuthenticatedReqHandler } from "./types";
 import { IMessage } from "../models/types";
 
 // Util to make custom errors for any db operation that fails
@@ -10,7 +11,11 @@ import Message from "../models/message";
 
 // Send all existing messages as JSON.  Note that author data is partially
 // populated in this response.
-export const respondWithMessages: RequestHandler = async (req, res, next) => {
+export const respondWithMessages: TAuthenticatedReqHandler = async (
+    req,
+    res,
+    next
+) => {
     const messages = await Message.find()
         .populate("author", "createdAt updatedAt displayName photos")
         .exec();
@@ -19,7 +24,11 @@ export const respondWithMessages: RequestHandler = async (req, res, next) => {
 };
 
 // Create a new message and respond with the created message.
-export const createMessage: RequestHandler = async (req, res, next) => {
+export const createMessage: TAuthenticatedReqHandler = async (
+    req,
+    res,
+    next
+) => {
     const { text } = req.body;
 
     const newMessage = await Message.create({ text, author: req.user._id });
@@ -39,7 +48,11 @@ export const createMessage: RequestHandler = async (req, res, next) => {
 };
 
 // delete a message.
-export const deleteMessage: RequestHandler = async (req, res, next) => {
+export const deleteMessage: TAuthenticatedReqHandler = async (
+    req,
+    res,
+    next
+) => {
     const messageToDelete = await Message.findById(req.params.id).exec();
 
     if (messageToDelete === null) {

@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import apiRoutes from "./api";
+import mongoose from "mongoose";
 
 // Get error handler for test 'server'
 import { handleErrors } from "../handlers/error";
@@ -11,7 +12,6 @@ import bodyParser from "body-parser";
 
 // Get type for user prop on req
 import { IUser, IMessage } from "../models/types";
-import mongoose from "../database";
 
 const testDB = new tdb();
 
@@ -19,7 +19,10 @@ let app: Express = express();
 let currUser: IUser;
 
 async function setup(
-    config: { users?: number; messages?: number } = {}
+    config: {
+        users?: number;
+        messages?: number;
+    } = {}
 ): Promise<[Array<IUser>, Array<IMessage>]> {
     await testDB
         .genMockUsers(config.users || 2)
@@ -100,7 +103,18 @@ describe("the api routes", () => {
         const dbMessages = await testDB._Message.find();
 
         expect(resText.text).toEqual("test text");
-        expect(resText.author).toEqual(currUser._id.toString());
+
+        // ensure correct properties are populated on 'author' field of new message in response
+        expect(resText.author).toEqual(
+            expect.objectContaining({
+                createdAt: expect.any(String),
+                updatedAt: expect.any(String),
+                displayName: expect.any(String),
+                photos: expect.arrayContaining([
+                    { value: expect.any(String), _id: expect.any(String) }
+                ])
+            })
+        );
 
         // ensure there is an extra Message doc in db
         expect(dbMessages.length).toEqual(messages.length + 1);
@@ -149,5 +163,39 @@ describe("the api routes", () => {
         );
 
         expect(res.status).toBe(403);
+    });
+
+    it('responds to POST "/user/following" by adding another user to list of followed and sending updated user', async () => {
+        await setup();
+
+        const newFollowingId = mongoose.Types.ObjectId().toHexString();
+
+        const response = await request(app)
+            .post("/user/following")
+            .send({ follow: newFollowingId });
+
+        const resText = JSON.parse(response.text);
+
+        const expected = [...currUser.getFollowingStrings(), newFollowingId];
+
+        expect(resText.following).toEqual(expected);
+    });
+
+    it('responds to PATCH "/user/following" by removing specified user id from list of followed and sending updated user', async () => {
+        await setup();
+
+        const userToUnfollow = currUser.getFollowingStrings()[0];
+
+        const response = await request(app)
+            .patch("/user/following")
+            .send({ unfollow: userToUnfollow });
+
+        const resText = JSON.parse(response.text);
+
+        const expected = currUser
+            .getFollowingStrings()
+            .filter((idString) => idString !== userToUnfollow);
+
+        expect(resText.following).toEqual(expected);
     });
 });

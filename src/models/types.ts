@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
-import { TDiffTypeProps } from "../declarations/utilityTypes";
 import { Request } from "express";
+import mongoose from "../database";
 
 // Type for Message documents retrieved by Mongoose (with Mongoose wrapper)
 export interface IMessage extends Document {
@@ -10,6 +10,13 @@ export interface IMessage extends Document {
     author: string;
     isAuthorizedRequest: (req: Request) => boolean;
 }
+
+// Type of the populated 'author' prop on Message documents sent to client
+// that do not belong to the currently authenticated user
+export type TPopulatedAuthor = Pick<
+    IUser,
+    "createdAt" | "updatedAt" | "displayName" | "photos"
+>;
 
 // Type for User documents retrieved by Mongoose (with Mongoose wrapper)
 export interface IUser extends Document {
@@ -31,4 +38,8 @@ export interface IUser extends Document {
     createdAt: string;
 
     updatedAt: string;
+
+    following: mongoose.Types.ObjectId[];
+
+    getFollowingStrings: () => string[];
 }
