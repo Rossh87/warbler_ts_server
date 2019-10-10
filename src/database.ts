@@ -10,12 +10,5 @@ mongoose.connect(DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true
 });
-/*The line below sets a customer getter for the id property of all Mongoose documents/schemas.
-It causes Mongoose docs to return a string when their id prop is accessed rather than the native
-js object of type ObjectId
-*/
-
-// @ts-ignore
-mongoose.ObjectId.get((v) => v.toString());
 
 export default mongoose;

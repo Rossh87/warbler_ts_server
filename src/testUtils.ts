@@ -11,9 +11,6 @@ import { IUser, IMessage } from "./models/types";
 const MLAB_USERNAME = process.env.MLAB_USERNAME;
 const MLAB_PW = process.env.MLAB_PW;
 
-// @ts-ignore
-mongoose.ObjectId.get((v) => v.toString());
-
 mongoose.connect(
     `mongodb://${MLAB_USERNAME}:${MLAB_PW}@ds229415.mlab.com:29415/warbler_test_db`,
     {
